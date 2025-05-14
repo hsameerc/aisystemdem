@@ -15,8 +15,8 @@
 
             <div class="card">
                 <div class="card-body" style="min-height:400px; max-height: 400px; overflow-y: scroll;">
-                    <div v-for="message in getSupportData.results" :key="index" class="mb-3">
-                        <p><strong>{{ message.prompt }}</strong>: {{ message.completion }}</p>
+                    <div v-for="(message, index) in messages" :key="index" class="mb-3">
+                        <p><strong>{{ message.sender }}</strong>: {{ message.text }}</p>
                     </div>
                 </div>
             </div>
@@ -36,6 +36,7 @@ export default {
     name: 'TestModel',
     data() {
         return {
+            socket: null,
             model_id: false,
             messages: [],
             prompt: '',
@@ -45,6 +46,7 @@ export default {
     },
     created() {
         this.model_id = this.$route.params.uuid;
+        this.initWebSocket();
         this.fetchModal()
         this.fetchSupportData()
     },
@@ -56,16 +58,45 @@ export default {
     methods: {
         ...mapActions('model', ['httpGetModelDetail', 'httpTestModel']),
         ...mapActions('supportdata', ['httpGetSupportData']),
+
+        initWebSocket() {
+            const ws_url = `ws://127.0.0.1:8090/ws/chat/${this.model_id}/`;
+            this.socket = new WebSocket(ws_url);
+            this.socket.onopen = () => {
+                console.log("WebSocket connected");
+            };
+            this.socket.onmessage = (event) => {
+                const parsed_data = JSON.parse(event.data);
+                const reply = parsed_data.reply?.trim();
+                if(reply){
+                    this.messages.push({
+                        sender: "Bot",
+                        text: reply
+                    });
+                }
+            };
+            this.socket.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+            this.socket.onclose = () => {
+                console.warn("WebSocket closed. Attempting to reconnect...");
+                setTimeout(this.initWebSocket, 2000);
+            };
+        },
+
         async sendMessage() {
-            console.log(this.newMessage)
             if (this.newMessage.trim() === '') return;
-            this.prompt = this.newMessage
+
+            const msg = {
+                message: this.newMessage
+            };
+
             this.messages.push({sender: 'You', text: this.newMessage});
-            await this.httpTestModel({uuid: this.model_id, data: {prompt: this.newMessage}})
-            this.response = this.getTestModel.response;
-            console.log("RESPONSEE")
+            console.log(JSON.stringify(msg))
+            this.socket.send(JSON.stringify(msg));
+            console.log(this.newMessage)
+            console.log(this.messages)
             this.newMessage = '';
-            this.fetchSupportData()
         },
 
         saveResponse() {

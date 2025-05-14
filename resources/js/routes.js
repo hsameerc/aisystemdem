@@ -66,9 +66,9 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    if(to.fullPath.includes('/access')){
+    if (to.fullPath.includes('/access')) {
 
-    }else if (!to.matched.length) {
+    } else if (!to.matched.length) {
         next('/app/404');
     } else {
         const isLoggedIn = store.getters['user/isLoggedIn'];
