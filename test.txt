@@ -1,0 +1,17 @@
+* Trying 172.22.0.3:8080
+... * Connected to support.prod (172.22.0.3) port 8080 > POST /api/auth/register/ HTTP/1.1
+Host: support.prod:8080
+User-Agent: GuzzleHttp/7
+Content-Type: application/json
+Accept: application/json
+Content-Length: 158
+< HTTP/1.1 400 Bad Request < Server: gunicorn
+< Date: Tue, 31 Oct 2023 04:38:58 GMT
+< Connection: close
+< Content-Type: application/json
+< Allow: POST, OPTIONS
+< X-Frame-Options: DENY
+< Vary: origin
+< Content-Length: 58
+< X-Content-Type-Options: nosniff < Referrer-Policy: same-origin
+< Cross-Origin-Opener-Policy: same-origin < * Closing connection

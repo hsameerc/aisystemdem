@@ -1,0 +1,22 @@
+// Body
+$body-bg: rgb(255, 255, 255);
+$primary: rgb( 0, 9, 131);
+$secondary: rgb(18, 45, 183);
+$success: rgb(28, 159, 25);
+$info: rgb(18, 45, 183);
+$light: rgb(243, 247, 250);
+//$light: rgb(240, 240, 245);
+
+
+// Typography
+$font-family-sans-serif: 'Roboto', sans-serif;
+$font-size-base: 1rem;
+$line-height-base: 1.6;
+
+.card{
+    border:none !important;
+    background: rgba(248, 249, 255, 0.4) !important;
+}
+.navbar{
+    border-radius: 5px;
+}

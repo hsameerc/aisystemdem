@@ -1,0 +1,80 @@
+version: '3'
+services:
+  openaimain.prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 'hsameer/openaisupportmain'
+    depends_on:
+      - openai_db
+    volumes:
+      - '.:/system'
+    environment:
+      DB_HOST: 'openai_db'
+      DB_DATABASE: 'openaimain'
+      DB_USERNAME: 'user'
+      DB_PASSWORD: 'password'
+    networks:
+      - support_support_system
+      - openai_network_main
+      - openai_network_internal
+    deploy:
+      replicas: 1
+  openai_db:
+    container_name: OpenaiMYSQL
+    image: mysql/mysql-server:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: openaimain
+    volumes:
+      - "openai-sql:/var/lib/mysql"
+    ports:
+      - "3314:3306"
+    expose:
+      - "3314"
+    networks:
+      - openai_network_internal
+  openai_redis:
+    container_name: OpenaiREDIS
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - '6378:6379'
+    expose:
+      - "6378"
+    volumes:
+      - 'openai-redis:/data'
+    networks:
+      - openai_network_internal
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      retries: 3
+      timeout: 5s
+  openai_nginx:
+    image: nginx:latest
+    container_name: openaiNGINX
+    restart: unless-stopped
+    depends_on:
+      - openaimain.prod
+    networks:
+      - openai_network_main
+      - openai_network_internal
+    ports:
+      - "8080:80"
+    volumes:
+      - ./prod/reverse:/etc/nginx/conf.d
+networks:
+    support_support_system:
+        external: true
+    openai_network_main:
+        driver: bridge
+    openai_network_internal:
+        driver: bridge
+volumes:
+  openai-sql:
+    driver: local
+  openai-redis:
+    driver: local
